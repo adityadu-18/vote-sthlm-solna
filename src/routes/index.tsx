@@ -15,17 +15,17 @@ const ballotQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Solna & Region Stockholm Ballot Guide 2026" },
+      { title: "Röstklar Sthlm och Solna — Voter Guide 2026" },
       {
         name: "description",
         content:
-          "Compare parties and browse every candidate on the Solna municipal and Region Stockholm ballots, with official candidate data from Valmyndigheten.",
+          "An English-language ballot guide for eligible non-EU residents in Solna, covering the municipal and Region Stockholm elections.",
       },
-      { property: "og:title", content: "Solna & Region Stockholm Ballot Guide 2026" },
+      { property: "og:title", content: "Röstklar Sthlm och Solna" },
       {
         property: "og:description",
         content:
-          "Party comparison, full candidate lists and a personal shortlist for the Solna municipal and Region Stockholm elections.",
+          "Compare parties, browse official candidate lists and save your two ballot choices for Solna and Region Stockholm.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -87,18 +87,29 @@ function Dashboard() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
       <header className="mb-10">
+        <div className="mb-8 flex items-center gap-3 border-b border-border pb-5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <Vote className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="font-serif text-2xl leading-none">Röstklar Sthlm och Solna</p>
+            <p className="mt-1 text-xs font-medium text-muted-foreground">
+              A ballot guide for non-EU residents in Solna
+            </p>
+          </div>
+        </div>
         <p className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
           <Vote className="h-3.5 w-3.5" aria-hidden />
           Election day · 13 September 2026 · polls open 08:00–20:00
         </p>
         <h1 className="mt-4 text-4xl leading-tight sm:text-6xl">
-          Your two ballots in Solna
+          Understand your two ballots
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          As a resident of Solna without Swedish citizenship you vote in two of the three
-          elections today: the municipal council in Solna and the regional council for
-          Region Stockholm. Compare the parties, read the full candidate lists, and mark
-          your picks below.
+          If you are an eligible non-EU resident of Solna, you vote in two of today’s three
+          elections: the municipal council in Solna and the regional council for Region
+          Stockholm. Compare the parties, read the full candidate lists, and mark your picks
+          below.
         </p>
       </header>
 

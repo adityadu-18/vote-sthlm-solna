@@ -77,11 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Röstklar Sthlm och Solna" },
+      {
+        name: "description",
+        content: "An English-language ballot guide for eligible non-EU residents in Solna.",
+      },
+      { name: "author", content: "Röstklar Sthlm och Solna" },
+      { property: "og:title", content: "Röstklar Sthlm och Solna" },
+      {
+        property: "og:description",
+        content: "A practical guide to the Solna municipal and Region Stockholm ballots.",
+      },
+      { property: "og:site_name", content: "Röstklar Sthlm och Solna" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
