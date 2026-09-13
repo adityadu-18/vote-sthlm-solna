@@ -86,6 +86,9 @@ function Dashboard() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <p className="mb-6 text-right text-xs text-muted-foreground">
+        Designed by Aditya Udapudi
+      </p>
       <header className="mb-10">
         <div className="mb-8 flex items-center gap-3 border-b border-border pb-5">
           <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -279,6 +282,9 @@ function Dashboard() {
           Party descriptions are short editorial summaries, not statements from the parties.
           Candidate lists come straight from the official register but always check the
           printed ballot paper at the polling station before you vote.
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Designed by Aditya Udapudi
         </p>
       </footer>
     </main>
