@@ -1,0 +1,238 @@
+import { useMemo, useState } from "react";
+import { Check, Search, Users } from "lucide-react";
+import type { BallotList } from "@/lib/ballots.functions";
+import { OTHER_PARTY, PARTIES, PARTY_BY_OFFICIAL_NAME, ROLE_LABEL } from "@/lib/parties";
+import type { Pick, Shortlist } from "./useShortlist";
+
+type Props = {
+  ballot: keyof Shortlist;
+  lists: BallotList[];
+  pick: Pick;
+  onPickParty: (value: { partyName: string; partyAbbr: string; listNumber: string }) => void;
+  onPickCandidate: (name: string, order: number) => void;
+};
+
+const ORDER = new Map(PARTIES.map((p, i) => [p.officialName, i]));
+
+function metaFor(list: BallotList) {
+  const known = PARTY_BY_OFFICIAL_NAME.get(list.partyName);
+  if (known) return known;
+  return {
+    ...OTHER_PARTY,
+    officialName: list.partyName,
+    swedishName: list.partyName,
+    englishName: list.partyName,
+    code: list.partyAbbr || "—",
+  };
+}
+
+export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidate }: Props) {
+  const [openList, setOpenList] = useState<string | null>(pick.listNumber);
+  const [query, setQuery] = useState("");
+
+  const sorted = useMemo(
+    () =>
+      [...lists].sort((a, b) => {
+        const ai = ORDER.get(a.partyName) ?? 99;
+        const bi = ORDER.get(b.partyName) ?? 99;
+        if (ai !== bi) return ai - bi;
+        return b.candidates.length - a.candidates.length;
+      }),
+    [lists],
+  );
+
+  const open = sorted.find((l) => l.listNumber === openList) ?? null;
+  const filtered = useMemo(() => {
+    if (!open) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return open.candidates;
+    return open.candidates.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.occupation ?? "").toLowerCase().includes(q) ||
+        (c.area ?? "").toLowerCase().includes(q),
+    );
+  }, [open, query]);
+
+  if (!lists.length) {
+    return (
+      <p className="rounded-lg border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
+        No candidate lists could be loaded for this ballot right now. Check the official
+        register linked at the bottom of the page before you vote.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {sorted.map((list) => {
+          const meta = metaFor(list);
+          const role = ballot === "municipal" ? meta.solnaRole : meta.regionRole;
+          const focus = ballot === "municipal" ? meta.solnaFocus : meta.regionFocus;
+          const selected = pick.listNumber === list.listNumber;
+          const expanded = openList === list.listNumber;
+
+          return (
+            <article
+              key={list.listNumber}
+              className={`relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all ${
+                selected ? "border-primary ring-2 ring-primary/30" : "border-border hover:shadow-md"
+              }`}
+            >
+              <span
+                className="absolute inset-x-0 top-0 h-1.5"
+                style={{ backgroundColor: meta.color }}
+                aria-hidden
+              />
+              <div className="flex flex-1 flex-col gap-3 p-5 pt-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span
+                      className="inline-flex h-7 min-w-7 items-center justify-center rounded-md px-2 text-xs font-bold"
+                      style={{ backgroundColor: meta.color, color: meta.onColor }}
+                    >
+                      {meta.code}
+                    </span>
+                    <h3 className="mt-2 text-xl leading-tight">{meta.englishName}</h3>
+                    <p className="text-xs text-muted-foreground">{meta.swedishName}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                      role === "governing"
+                        ? "bg-primary/10 text-primary"
+                        : role === "support"
+                          ? "bg-accent text-accent-foreground"
+                          : role === "opposition"
+                            ? "bg-secondary text-secondary-foreground"
+                            : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {ROLE_LABEL[role]}
+                  </span>
+                </div>
+
+                <p className="text-sm leading-relaxed text-muted-foreground">{focus}</p>
+
+                <div className="mt-auto flex items-center gap-2 pt-2 text-xs text-muted-foreground">
+                  <Users className="h-3.5 w-3.5" aria-hidden />
+                  {list.candidates.length} candidates
+                  {list.constituencyLabel ? ` · ${list.constituencyLabel}` : ""}
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onPickParty({
+                        partyName: meta.englishName,
+                        partyAbbr: meta.code,
+                        listNumber: list.listNumber,
+                      })
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      selected
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-input bg-background hover:bg-secondary"
+                    }`}
+                  >
+                    {selected ? <Check className="h-4 w-4" aria-hidden /> : null}
+                    {selected ? "On your ballot" : "Choose this party"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setOpenList(expanded ? null : list.listNumber);
+                    }}
+                    className="rounded-md px-3 py-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {expanded ? "Hide candidates" : "View candidates"}
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      {open ? (
+        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-2xl">{metaFor(open).englishName} — ballot list</h3>
+              <p className="text-sm text-muted-foreground">
+                Ranked as printed on the ballot paper. Tick one name to mark your personal
+                vote (kryss).
+              </p>
+            </div>
+            <label className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search name, job, area"
+                className="w-64 rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                aria-label="Search candidates"
+              />
+            </label>
+          </div>
+
+          <ol className="mt-4 divide-y divide-border">
+            {filtered.map((c) => {
+              const chosen = pick.listNumber === open.listNumber && pick.candidateName === c.name;
+              return (
+                <li key={`${c.order}-${c.name}`}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (pick.listNumber !== open.listNumber) {
+                        onPickParty({
+                          partyName: metaFor(open).englishName,
+                          partyAbbr: metaFor(open).code,
+                          listNumber: open.listNumber,
+                        });
+                      }
+                      onPickCandidate(c.name, c.order);
+                    }}
+                    className={`flex w-full items-center gap-4 rounded-md px-3 py-2.5 text-left transition-colors ${
+                      chosen ? "bg-primary/10" : "hover:bg-secondary"
+                    }`}
+                  >
+                    <span className="w-8 shrink-0 text-sm tabular-nums text-muted-foreground">
+                      {c.order}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">{c.name}</span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {[c.age ? `${c.age} yrs` : null, c.occupation, c.area]
+                          .filter(Boolean)
+                          .join(" · ") || c.homeMunicipality}
+                      </span>
+                    </span>
+                    <span
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border text-primary ${
+                        chosen ? "border-primary bg-primary/15" : "border-input"
+                      }`}
+                      aria-hidden
+                    >
+                      {chosen ? <Check className="h-4 w-4" /> : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+            {!filtered.length ? (
+              <li className="py-6 text-center text-sm text-muted-foreground">
+                No candidate matches “{query}”.
+              </li>
+            ) : null}
+          </ol>
+        </section>
+      ) : null}
+    </div>
+  );
+}
