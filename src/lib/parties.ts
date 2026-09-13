@@ -1,3 +1,12 @@
+import socialDemocratsLogo from "@/assets/party-logos/s.svg.asset.json";
+import leftPartyLogo from "@/assets/party-logos/v.svg.asset.json";
+import greenPartyLogo from "@/assets/party-logos/mp.svg.asset.json";
+import centrePartyLogo from "@/assets/party-logos/c.svg.asset.json";
+import moderatePartyLogo from "@/assets/party-logos/m.svg.asset.json";
+import liberalPartyLogo from "@/assets/party-logos/l.svg.asset.json";
+import christianDemocratsLogo from "@/assets/party-logos/kd.svg.asset.json";
+import swedenDemocratsLogo from "@/assets/party-logos/sd.svg.asset.json";
+
 export type PartyRole = "governing" | "support" | "opposition" | "other";
 
 export type PartyMeta = {
@@ -7,6 +16,7 @@ export type PartyMeta = {
   englishName: string;
   color: string;
   onColor: string;
+  logo?: { src: string; alt: string };
   blurb: string;
   solnaFocus: string;
   regionFocus: string;
@@ -27,6 +37,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Social Democrats",
     color: "#E8112D",
     onColor: "#FFFFFF",
+    logo: { src: socialDemocratsLogo.url, alt: "Social Democrats logo" },
     blurb: "Centre-left. Strong public sector, welfare funded by taxes, union-friendly.",
     solnaFocus:
       "Leads the governing Solna Coalition. Smaller class sizes, more staff in preschools and elderly care, slower privatisation of municipal services.",
@@ -42,6 +53,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Left Party",
     color: "#AF0000",
     onColor: "#FFFFFF",
+    logo: { src: leftPartyLogo.url, alt: "Left Party logo" },
     blurb: "Left. Against profit in tax-funded welfare, strong focus on equality and public ownership.",
     solnaFocus:
       "Part of the governing coalition in Solna. Wants more municipally owned rental housing, no profit-driven school or care providers.",
@@ -57,6 +69,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Green Party",
     color: "#83CF39",
     onColor: "#10240B",
+    logo: { src: greenPartyLogo.url, alt: "Green Party logo" },
     blurb: "Green. Climate, nature and cycling before car traffic.",
     solnaFocus:
       "Part of the governing coalition in Solna. Protects green areas and the National City Park, prioritises walking, cycling and transit in new city planning.",
@@ -72,6 +85,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Centre Party",
     color: "#009933",
     onColor: "#FFFFFF",
+    logo: { src: centrePartyLogo.url, alt: "Centre Party logo" },
     blurb: "Liberal centre. Small business friendly, decentralised decisions, green market solutions.",
     solnaFocus:
       "The centre-right party that crossed the bloc line to join the Solna Coalition. Focus on local enterprise, green space and school choice within a public framework.",
@@ -87,6 +101,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Moderate Party",
     color: "#52BDEC",
     onColor: "#062A38",
+    logo: { src: moderatePartyLogo.url, alt: "Moderate Party logo" },
     blurb: "Centre-right. Lower taxes, private providers in welfare, law-and-order focus.",
     solnaFocus:
       "Largest opposition party. Governed Solna for 24 years until 2022 and campaigns on low municipal tax, freedom of choice and continued city development.",
@@ -102,6 +117,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Liberal Party",
     color: "#006AB3",
     onColor: "#FFFFFF",
+    logo: { src: liberalPartyLogo.url, alt: "Liberal Party logo" },
     blurb: "Liberal. School quality, individual rights, pro-EU.",
     solnaFocus:
       "In opposition. Strong emphasis on schools, teacher pay and knowledge results, plus integration through language and work.",
@@ -117,6 +133,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Christian Democrats",
     color: "#000077",
     onColor: "#FFFFFF",
+    logo: { src: christianDemocratsLogo.url, alt: "Christian Democrats logo" },
     blurb: "Christian-democratic centre-right. Family policy, elderly care, civil society.",
     solnaFocus:
       "In opposition. Elderly care quality, support for families and voluntary organisations in Solna.",
@@ -132,6 +149,7 @@ export const PARTIES: PartyMeta[] = [
     englishName: "Sweden Democrats",
     color: "#DDDD00",
     onColor: "#2B2B00",
+    logo: { src: swedenDemocratsLogo.url, alt: "Sweden Democrats logo" },
     blurb: "Nationalist right. Restrictive immigration policy, crime and welfare chauvinism.",
     solnaFocus:
       "In opposition. Campaigns on safety, restrictive local reception of newcomers and cost cuts in municipal administration.",
