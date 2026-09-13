@@ -283,6 +283,9 @@ function Dashboard() {
           Candidate lists come straight from the official register but always check the
           printed ballot paper at the polling station before you vote.
         </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Designed by Aditya Udapudi
+        </p>
       </footer>
     </main>
   );
