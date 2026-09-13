@@ -3,6 +3,7 @@ import { Check, Search, Users } from "lucide-react";
 import type { BallotList } from "@/lib/ballots.functions";
 import { OTHER_PARTY, PARTIES, PARTY_BY_OFFICIAL_NAME, ROLE_LABEL } from "@/lib/parties";
 import type { Pick, Shortlist } from "./useShortlist";
+import type { PartyMeta } from "@/lib/parties";
 
 type Props = {
   ballot: keyof Shortlist;
@@ -24,6 +25,31 @@ function metaFor(list: BallotList) {
     englishName: list.partyName,
     code: list.partyAbbr || "—",
   };
+}
+
+function PartyMark({ meta }: { meta: PartyMeta }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  return (
+    <div className="flex h-14 w-24 items-center justify-center rounded-md border border-border bg-background p-2">
+      {meta.logo && !logoFailed ? (
+        <img
+          src={meta.logo.src}
+          alt={meta.logo.alt}
+          className="h-full w-full object-contain"
+          onError={() => setLogoFailed(true)}
+        />
+      ) : (
+        <span
+          className="inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-bold"
+          style={{ backgroundColor: meta.color, color: meta.onColor }}
+          aria-label={`${meta.swedishName} abbreviation`}
+        >
+          {meta.code}
+        </span>
+      )}
+    </div>
+  );
 }
 
 export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidate }: Props) {
@@ -88,12 +114,16 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
               <div className="flex flex-1 flex-col gap-3 p-5 pt-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span
-                      className="inline-flex h-7 min-w-7 items-center justify-center rounded-md px-2 text-xs font-bold"
-                      style={{ backgroundColor: meta.color, color: meta.onColor }}
-                    >
-                      {meta.code}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <PartyMark meta={meta} />
+                      <span
+                        className="inline-flex h-7 min-w-7 items-center justify-center rounded-md px-2 text-xs font-bold"
+                        style={{ backgroundColor: meta.color, color: meta.onColor }}
+                        aria-label={`${meta.swedishName} abbreviation`}
+                      >
+                        {meta.code}
+                      </span>
+                    </div>
                     <h3 className="mt-2 text-xl leading-tight">{meta.englishName}</h3>
                     <p className="text-xs text-muted-foreground">{meta.swedishName}</p>
                   </div>
