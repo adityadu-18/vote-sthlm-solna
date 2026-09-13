@@ -1,7 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, Search, Users } from "lucide-react";
 import type { BallotList } from "@/lib/ballots.functions";
 import { OTHER_PARTY, PARTIES, PARTY_BY_OFFICIAL_NAME, ROLE_LABEL } from "@/lib/parties";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Pick, Shortlist } from "./useShortlist";
 import type { PartyMeta } from "@/lib/parties";
 
@@ -53,8 +62,9 @@ function PartyMark({ meta }: { meta: PartyMeta }) {
 }
 
 export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidate }: Props) {
-  const [openList, setOpenList] = useState<string | null>(pick.listNumber);
+  const [openList, setOpenList] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const sorted = useMemo(
     () =>
@@ -97,7 +107,6 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
           const role = ballot === "municipal" ? meta.solnaRole : meta.regionRole;
           const focus = ballot === "municipal" ? meta.solnaFocus : meta.regionFocus;
           const selected = pick.listNumber === list.listNumber;
-          const expanded = openList === list.listNumber;
 
           return (
             <article
@@ -171,13 +180,14 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(event) => {
+                      lastTriggerRef.current = event.currentTarget;
                       setQuery("");
-                      setOpenList(expanded ? null : list.listNumber);
+                      setOpenList(list.listNumber);
                     }}
                     className="rounded-md px-3 py-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    {expanded ? "Hide candidates" : "View candidates"}
+                    View candidates
                   </button>
                 </div>
               </div>
@@ -186,83 +196,127 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
         })}
       </div>
 
-      {open ? (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-2xl">{metaFor(open).englishName} — ballot list</h3>
-              <p className="text-sm text-muted-foreground">
-                Ranked as printed on the ballot paper. Tick one name to mark your personal
-                vote (kryss).
-              </p>
-            </div>
-            <label className="relative">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                aria-hidden
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search name, job, area"
-                className="w-64 rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                aria-label="Search candidates"
-              />
-            </label>
-          </div>
+      <Dialog
+        open={Boolean(open)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpenList(null);
+            setQuery("");
+          }
+        }}
+      >
+        {open ? (
+          <DialogContent
+            className="flex h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-lg p-0 sm:max-h-[min(780px,calc(100dvh-3rem))]"
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              lastTriggerRef.current?.focus();
+            }}
+          >
+            <DialogHeader className="border-b border-border px-5 pb-4 pt-5 pr-14 text-left sm:px-6 sm:pt-6">
+              <div className="flex items-center gap-3">
+                <PartyMark meta={metaFor(open)} />
+                <div className="min-w-0">
+                  <DialogTitle className="truncate font-serif text-2xl font-normal">
+                    {metaFor(open).englishName} candidates
+                  </DialogTitle>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {ballot === "municipal" ? "Solna Municipality" : "Region Stockholm"} ·{" "}
+                    {open.candidates.length} candidates
+                  </p>
+                </div>
+              </div>
+              <DialogDescription className="pt-2 leading-relaxed">
+                Ranked as printed on the ballot paper. Choose one name for your personal vote;
+                this also chooses {metaFor(open).englishName} as your party.
+              </DialogDescription>
+              <label className="relative mt-3 block">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search name, job, or area"
+                  className="h-11 w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
+                  aria-label="Search candidates"
+                />
+              </label>
+            </DialogHeader>
 
-          <ol className="mt-4 divide-y divide-border">
-            {filtered.map((c) => {
-              const chosen = pick.listNumber === open.listNumber && pick.candidateName === c.name;
-              return (
-                <li key={`${c.order}-${c.name}`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (pick.listNumber !== open.listNumber) {
-                        onPickParty({
-                          partyName: metaFor(open).englishName,
-                          partyAbbr: metaFor(open).code,
-                          listNumber: open.listNumber,
-                        });
-                      }
-                      onPickCandidate(c.name, c.order);
-                    }}
-                    className={`flex w-full items-center gap-4 rounded-md px-3 py-2.5 text-left transition-colors ${
-                      chosen ? "bg-primary/10" : "hover:bg-secondary"
-                    }`}
-                  >
-                    <span className="w-8 shrink-0 text-sm tabular-nums text-muted-foreground">
-                      {c.order}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">{c.name}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {[c.age ? `${c.age} yrs` : null, c.occupation, c.area]
-                          .filter(Boolean)
-                          .join(" · ") || c.homeMunicipality}
-                      </span>
-                    </span>
-                    <span
-                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border text-primary ${
-                        chosen ? "border-primary bg-primary/15" : "border-input"
-                      }`}
-                      aria-hidden
-                    >
-                      {chosen ? <Check className="h-4 w-4" /> : null}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-            {!filtered.length ? (
-              <li className="py-6 text-center text-sm text-muted-foreground">
-                No candidate matches “{query}”.
-              </li>
-            ) : null}
-          </ol>
-        </section>
-      ) : null}
+            <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 sm:px-4" role="radiogroup" aria-label="Choose one candidate">
+              <ol className="divide-y divide-border">
+                {filtered.map((c) => {
+                  const chosen = pick.listNumber === open.listNumber && pick.candidateName === c.name;
+                  return (
+                    <li key={`${c.order}-${c.name}`}>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={chosen}
+                        onClick={() => {
+                          if (pick.listNumber !== open.listNumber) {
+                            onPickParty({
+                              partyName: metaFor(open).englishName,
+                              partyAbbr: metaFor(open).code,
+                              listNumber: open.listNumber,
+                            });
+                          }
+                          onPickCandidate(c.name, c.order);
+                        }}
+                        className={`flex min-h-16 w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          chosen ? "bg-primary/10" : "hover:bg-secondary"
+                        }`}
+                      >
+                        <span className="w-8 shrink-0 text-sm tabular-nums text-muted-foreground">
+                          {c.order}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-medium">{c.name}</span>
+                          <span className="block text-xs leading-relaxed text-muted-foreground">
+                            {[c.age ? `${c.age} yrs` : null, c.occupation, c.area]
+                              .filter(Boolean)
+                              .join(" · ") || c.homeMunicipality}
+                          </span>
+                        </span>
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-primary ${
+                            chosen ? "border-primary bg-primary/15" : "border-input"
+                          }`}
+                          aria-hidden
+                        >
+                          {chosen ? <Check className="h-4 w-4" /> : null}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+                {!filtered.length ? (
+                  <li className="py-10 text-center text-sm text-muted-foreground">
+                    No candidate matches “{query}”.
+                  </li>
+                ) : null}
+              </ol>
+            </div>
+
+            <DialogFooter className="flex-row items-center justify-between gap-3 border-t border-border bg-card px-5 py-4 sm:px-6">
+              <p className="min-w-0 text-sm text-muted-foreground" aria-live="polite">
+                {pick.listNumber === open.listNumber && pick.candidateName ? (
+                  <>
+                    Selected: <span className="font-medium text-foreground">{pick.candidateName}</span>
+                  </>
+                ) : (
+                  "No personal vote selected"
+                )}
+              </p>
+              <Button type="button" onClick={() => setOpenList(null)} className="shrink-0">
+                Done
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        ) : null}
+      </Dialog>
     </div>
   );
 }
