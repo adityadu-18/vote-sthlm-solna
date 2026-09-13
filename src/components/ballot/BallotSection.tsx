@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, Search, Users } from "lucide-react";
 import type { BallotList } from "@/lib/ballots.functions";
 import { OTHER_PARTY, PARTIES, PARTY_BY_OFFICIAL_NAME, ROLE_LABEL } from "@/lib/parties";
@@ -64,6 +64,7 @@ function PartyMark({ meta }: { meta: PartyMeta }) {
 export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidate }: Props) {
   const [openList, setOpenList] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const sorted = useMemo(
     () =>
@@ -179,7 +180,8 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(event) => {
+                      lastTriggerRef.current = event.currentTarget;
                       setQuery("");
                       setOpenList(list.listNumber);
                     }}
@@ -204,7 +206,13 @@ export function BallotSection({ ballot, lists, pick, onPickParty, onPickCandidat
         }}
       >
         {open ? (
-          <DialogContent className="flex h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-lg p-0 sm:max-h-[min(780px,calc(100dvh-3rem))]">
+          <DialogContent
+            className="flex h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-lg p-0 sm:max-h-[min(780px,calc(100dvh-3rem))]"
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              lastTriggerRef.current?.focus();
+            }}
+          >
             <DialogHeader className="border-b border-border px-5 pb-4 pt-5 pr-14 text-left sm:px-6 sm:pt-6">
               <div className="flex items-center gap-3">
                 <PartyMark meta={metaFor(open)} />
