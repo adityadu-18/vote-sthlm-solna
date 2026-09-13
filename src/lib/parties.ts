@@ -2,7 +2,7 @@ import socialDemocratsLogo from "@/assets/party-logos/s.svg.asset.json";
 import leftPartyLogo from "@/assets/party-logos/v.svg.asset.json";
 import greenPartyLogo from "@/assets/party-logos/mp.svg.asset.json";
 import centrePartyLogo from "@/assets/party-logos/c.svg.asset.json";
-import moderatePartyLogo from "@/assets/party-logos/m.svg.asset.json";
+import moderatePartyLogo from "@/assets/party-logos/m.webp.asset.json";
 import liberalPartyLogo from "@/assets/party-logos/l.svg.asset.json";
 import christianDemocratsLogo from "@/assets/party-logos/kd.svg.asset.json";
 import swedenDemocratsLogo from "@/assets/party-logos/sd.svg.asset.json";
